@@ -72,6 +72,27 @@ class Parser
 	end
 end 
 
+class ParserBin < Parser
+	def self.can_handle? (file)
+		ext = File.extname(file)
+		if (ext == ".a" or ext == ".o" or ext == ".dylib" or ext == ".so")
+			return true
+		elsif File.executable? file
+			return true
+		end
+		return false
+	end
+	def parse
+		puts "Your binary file '#{File.basename(@filename)}' contains the following calls :"
+		calls = `nm -gu #{@filename} | sed 's/\$.*//' | sed '/^_/!D' | sed '/^__/D' | cut -c 2- | sed '/^ft_/D' | sort -u`
+		if calls
+			calls.each do |c|
+				puts "--> #{c}"
+			end
+		end
+	end
+end
+
 class ParserText < Parser
 	def expand_tabs(s)
 		s.gsub(/([^\t\n]*)\t/) do
