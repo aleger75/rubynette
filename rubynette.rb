@@ -1,4 +1,15 @@
-#!/usr/bin/env	ruby
+#!/usr/bin/env ruby #********************************************************* #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    rubynette.rb                                       :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: mbacoux <marvin@42.fr>                     +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2013/12/10 15:24:10 by mbacoux           #+#    #+#              #
+#    Updated: 2013/12/10 15:25:20 by mbacoux          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 
 def main
 	rubynette = Rubynette.new
@@ -7,7 +18,7 @@ end
 
 class Rubynette
 	def	initialize
-		@version = "1.0 beta"
+		@version = "1.1 Lemon"
 	end
 	def hello
 		puts "\e[36;1mRubynette\e[37;1m version \e[32;1m" + @version + "\e[0m"
@@ -302,6 +313,32 @@ class ParserSource < ParserText
 		super
 		if @func_count > 5
 			error " : More than 5 functions."
+		end
+	end
+end
+
+class ParserMakefile < ParserText
+	def self.can_handle? (file)
+		return (File.basename(file) == "Makefile")
+	end
+	def handle (file)
+		path = File.dirname(file)
+		files = `make -Bn -C #{path} | grep -o "[a-zA-Z0-9_/-]*\\.c"`
+		files.each do |f|
+			@rubynette.do_file(path + (path == "/" ? "" : "/") + f.gsub(/[\n]/, ''));
+		end
+		files = `make -Bn -C #{path} | grep -o "\\-I[ ]*[a-zA-Z0-9_/-]*" | sed "s/-I//" | tr -d " " | sort -u`
+		files = files + "."
+		files.each do |f|
+			dir = Dir.foreach(path + (path == "/" ? "" : "/") + f.gsub(/[\n]/, "")) do |d|
+				if File.extname(path + (path == "/" ? "" : "/") + f.gsub(/[\n]/, "") + "/" + d.gsub(/[\n]/, "")) == ".h"
+					@rubynette.do_file(path + (path == "/" ? "" : "/") + f.gsub(/[\n]/, "") + "/" + d.gsub(/[\n]/, ""))
+				end
+			end
+		end
+		files = `make -Bn -C #{path} | grep -o "make -C [a-zA-Z0-9_/-]*" | cut -c 8- | tr -d " "`
+		files.each do |f|
+			@rubynette.do_file(path + (path == "/" ? "" : "/") + f.gsub(/[\n]/, "") + "/" + "Makefile")
 		end
 	end
 end
