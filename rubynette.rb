@@ -38,7 +38,7 @@ class Rubynette
 			puts "File " + file + " does not exist."
 		else
 			Parser.descendants.each do |parser|
-				if parser.can_handle? file
+				if parser.can_handle? file and parser.handle_file_type? file
 					p = parser.new(self)
 					p.handle file
 					return
@@ -57,6 +57,9 @@ class Parser
 		ObjectSpace.each_object(Class).select { |klass| klass < self }
 	end
 	def self.can_handle? (file)
+		return false;
+	end
+	def self.handle_file_type? (file)
 		return false
 	end
 	def handle(filename)
@@ -72,7 +75,29 @@ class Parser
 	end
 end 
 
-class ParserBin < Parser
+class ParserFile < Parser
+	def self.handle_file_type? (file)
+		return File.file? file
+	end
+end
+
+class ParserDir < Parser
+	def self.can_handle? (file)
+		return true
+	end
+	def self.handle_file_type? (file)
+		return File.directory? file
+	end
+	def handle (file)
+		Dir.foreach file do |f|
+			if (f[0] != "."[0])
+				@rubynette.do_file((file == "/" ? "" : file) + "/" + f)
+			end
+		end
+	end
+end
+
+class ParserBin < ParserFile
 	def self.can_handle? (file)
 		ext = File.extname(file)
 		if (ext == ".a" or ext == ".o" or ext == ".dylib" or ext == ".so")
@@ -93,7 +118,7 @@ class ParserBin < Parser
 	end
 end
 
-class ParserText < Parser
+class ParserText < ParserFile
 	def expand_tabs(s)
 		s.gsub(/([^\t\n]*)\t/) do
 			$1 + " " * (4 - ($1.size % 4))
@@ -250,11 +275,9 @@ class ParserSource < ParserText
 				break
 			end
 			reg = '(?![ \n])' + o + '(?![ \n])'
-			if (str = line[/#{reg}/])
-				i = line.index(str)
-				if i and is_operator?(line[i - 1, 4], o)
-					error_line("Missing spaces around operator '#{o}'.", n);
-				end
+			i = line.index(/#{reg}/)
+			if i and is_operator?(line[i - 1, 4], o)
+				error_line("Missing spaces around operator '#{o}'.", n);
 			end
 		end
 		if line[0] == "#"[0]
