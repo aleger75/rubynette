@@ -210,6 +210,13 @@ class ParserSource < ParserText
 	end
 	def check_line(line, n)
 		super
+		if line[0, 2] == "/*" or line[0, 2] == "**" or line[0, 2] == "*/"
+			return
+		end
+		if line.include? "//"
+			error_line("C++ style comments are not allowed.", n)
+			return
+		end
 		if line[0] == "}"[0] and !line.include?(";")
 			@func_count += 1
 		end
@@ -217,10 +224,7 @@ class ParserSource < ParserText
 			error_line("Empty line with trailing spaces or tabs.", n)
 		elsif line[/^(.*)([\t ]+)\n$/]
 			error_line("Trailing whitespace.", n)
-		end
-		if line[0, 2] == "/*" or line[0, 2] == "**" or line[0, 2] == "*/"
-			return
-		end
+		end	
 		line.gsub!(%r{"(.*)"}, "\"\"")
 		line.gsub!(%r{'(.?)'}, "\' \'")
 		if line.count(";") > 1
@@ -251,9 +255,6 @@ class ParserSource < ParserText
 		end
 		if !line[/^[\t ]/] and !line.include?("=") and line.count(",") > 3
 			error_line("Function have too many parameters.", n)
-		end
-		if line.include? "//"
-			error_line("C++ style comments are not allowed.", n)
 		end
 		if line == "}\n"
 			if @line_count > 25
