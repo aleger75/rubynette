@@ -7,7 +7,7 @@ end
 
 class Rubynette
 	def	initialize
-		@version = "1.0.0 alpha"
+		@version = "1.0 beta"
 	end
 	def hello
 		puts "\e[36;1mRubynette\e[37;1m version \e[32;1m" + @version + "\e[0m"
@@ -62,7 +62,9 @@ class Parser
 	def handle(filename)
 		@filename = filename
 		@file = File.open filename
-		self.parse
+		sp = " " * 15
+		puts "\e[37;1m[ \e[35;1m ----------         PARSING FILE #{File.basename(filename.upcase)} #{sp[0, (sp.size - File.basename(filename).size)]} ---------- \e[37;1m]\e[0m"
+		parse
 		@file.close
 	end
 	def error(str)
@@ -117,14 +119,48 @@ class ParserSource < ParserText
 	def initialize(r)
 		super
 		@func_count = 0
+		@line_count = -1
+		@space_indent = 0
 		@banned_keywords = [ "for", "do", "switch", "case", "default", "goto", "lbl" ]
 		@keywords = [ "unsigned", "signed", "static", "const", "int", "short", "char",
 					"float", "long", "double", "size_t", "auto", "struct", "typedef",
 					"return", "break", "continue", "extern", "register", "restrict",
 					"void", "enum", "union", "volatile", "inline" ]
+		@binary_ops = [ ">>", "<<", "&&", "||", "==", "+=", "-=", "*=", "/=", "%=", ">=", "<=",
+						"?", ":", "!=", "&=", "|=", "^=", "^", "|", "=", "/",
+						">", "<"]
 	end
 	def self.can_handle? (file)
-		return File.extname(file) == ".c"
+		return (File.extname(file) == ".c" or File.extname(file) == ".h")
+	end
+	def is_operator?(str, op)
+		find = nil;
+		if str["->"]
+			return false
+		end
+		@binary_ops.each do |o|
+			if str[o]
+				find = o
+				break
+			end
+		end
+		return (find == op)
+	end
+	def get_def_indent(line)
+		str = line[/[a-z]/]
+		if str != nil
+			return line.index(str) - 1
+		else
+			return nil
+		end
+	end
+	def get_def_word(line)
+		start = get_def_indent(line)
+		len = line[/(([a-z])+)/]
+		if start == nil or len == nil
+			return nil
+		end
+		return line[start + 1, len.size]
 	end
 	def check_line(line, n)
 		super
@@ -144,7 +180,7 @@ class ParserSource < ParserText
 		if line.count(";") > 1
 			error_line("More than one instruction.", n)
 		end
-		if line.include?("if ") or line.include?("while ")
+		if (line.include?("if ") or line.include?("while ")) and line[0] != "#"[0]
 			if !line[/^((\t)+)((else )?)if /] and !line[/^((\t)+)while /]
 				error_line("Invalid text before control structure.", n)
 			end
@@ -162,7 +198,7 @@ class ParserSource < ParserText
 			end
 		end
 		@keywords.each do |w|
-			reg = '^(([\t (])*)' + w + '(?![\t )])'
+			reg = '^(([\t (])*)' + w + '[;(]'
 			if line[/#{reg}/]
 				error_line("Keyword '#{w}' not followed by whitespace.", n)
 			end
@@ -170,18 +206,58 @@ class ParserSource < ParserText
 		if !line[/^[\t ]/] and !line.include?("=") and line.count(",") > 3
 			error_line("Function have too many parameters.", n)
 		end
+		if line.include? "//"
+			error_line("C++ style comments are not allowed.", n)
+		end
+		if line == "}\n"
+			if @line_count > 25
+				error_line("Function have " + @line_count.to_s + " lines.", n);
+			end
+			@line_count = -1
+		end
+		if @line_count != -1
+			@line_count += 1
+		end
+		if line == "{\n"
+			@line_count = 0
+		end
+		if line[/sizeof(?![(])/]
+			error_line("Whitespace after sizeof.", n)
+		end
+		@binary_ops.each do |o|
+			if (line[0] == "#"[0])
+				break
+			end
+			reg = '(?![ \n])' + o + '(?![ \n])'
+			if (str = line[/#{reg}/])
+				i = line.index(str)
+				if i and is_operator?(line[i - 1, 4], o)
+					error_line("Missing spaces around operator '#{o}'.", n);
+				end
+			end
+		end
+		if line[0] == "#"[0]
+			word = get_def_word(line)
+			if (word == nil)
+				error_line("Lone sharp.", n)
+			else
+				if (word == "endif")
+					@space_indent -= 1
+				end
+				if (get_def_indent(line) != @space_indent)
+					error_line("Bad sharp indent, should be #{@space_indent.to_s}.", n)
+				end
+				if word == "if" or word == "ifdef" or word == "ifndef"
+					@space_indent += 1
+				end
+			end
+		end
 	end
 	def parse
 		super
 		if @func_count > 5
 			error " : More than 5 functions."
 		end
-	end
-end
-
-class ParserHeader < ParserSource
-	def self.can_handle? (file)
-		return (File.extname(file) == ".h")
 	end
 end
 
