@@ -6,7 +6,7 @@
 #    By: mbacoux <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2013/12/10 15:24:10 by mbacoux           #+#    #+#              #
-#    Updated: 2013/12/10 15:25:20 by mbacoux          ###   ########.fr        #
+#    Updated: 2013/12/12 01:33:18 by mbacoux          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,7 @@ end
 
 class Rubynette
 	def	initialize
-		@version = "1.1 Lemon"
+		@version = "1.1.1 Lemon"
 	end
 	def hello
 		puts "\e[36;1mRubynette\e[37;1m version \e[32;1m" + @version + "\e[0m"
@@ -82,7 +82,10 @@ class Parser
 		@file.close
 	end
 	def error(str)
-		puts "[\e[31;1mERROR\e[0m] In " + @filename + " " + str
+		puts "[\e[31;1m  ERROR  \e[0m] In " + @filename + " " + str
+	end
+	def warning(str)
+		puts "[\e[33;1m WARNING \e[0m] In " + @filename + " " + str
 	end
 end 
 
@@ -164,8 +167,16 @@ class ParserText < ParserFile
 		end
 		if err
 			error(": Missing header.")
+		else
+			check_filename(lines[3])
 		end
 		@file.rewind
+	end
+	def check_filename(line)
+		name = (line.split)[1]
+		if name != File.basename(@filename)
+			warning("Filename does not match header.")
+		end
 	end
 	def error_line(str, line)
 		error("at line " + (line + 1).to_s + " : " + str)
