@@ -18,7 +18,7 @@ To install Rubynette:
 
 ##Usage
 
-    $> nette <dir_path> <dir_path> <file_name>
+    $> rubynette [file1] [file2] [file3] ...
 
 ##License
 Rubynette is available under the [GNU General Public License, version 3](LICENSE).
