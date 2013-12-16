@@ -3,7 +3,7 @@
 #*******************************************************************************#
 #                                                                               #
 #                                                          :::      ::::::::    #
-#     nette                                              :+:      :+:    :+:    #
+#     rubynette                                          :+:      :+:    :+:    #
 #                                                      +:+ +:+         +:+      #
 #     By: evilsbol <evilsbol@student.42.fr>          +#+  +:+       +#+         #
 #                                                  +#+#+#+#+#+   +#+            #
@@ -14,4 +14,4 @@
 
 #bin executable inspired by 'check' by stherman of https://github.com/42School
 
-/usr/bin/ruby ~/bin/rubynette.rb $@
+rubynette.rb $@
