@@ -6,7 +6,7 @@
 #    By: mbacoux <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2013/12/10 15:24:10 by mbacoux           #+#    #+#              #
-#    Updated: 2013/12/12 01:33:18 by mbacoux          ###   ########.fr        #
+#    Updated: 2013/12/17 05:17:57 by mbacoux          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -347,7 +347,7 @@ class ParserMakefile < ParserText
 				end
 			end
 		end
-		files = `make -Bn -C #{path} | grep -o "make -C [a-zA-Z0-9_/-]*" | cut -c 8- | tr -d " "`
+		files = `make -Bn -C #{path} | grep -o "make -C [.a-zA-Z0-9_/-]*" | cut -c 8- | tr -d " "`
 		files.each do |f|
 			@rubynette.do_file(path + (path == "/" ? "" : "/") + f.gsub(/[\n]/, "") + "/" + "Makefile")
 		end
