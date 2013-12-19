@@ -11,24 +11,33 @@ Rubynette is a Norm checker, which operates on C source files, C headers, all ki
 To install Rubynette:
 
 1. Clone this repository in your home
+    ```bash
     $> cd ~
     $> git clone https://github.com/Nax/rubynette.git
+    ```
+
 2. Make a symbolic link to the rubynette files in your ~/bin (if it doesn't exist yet you should create your bin folder).
+    ```bash
     $> ln -s ~/rubynette/rubynette
     $> ln -s ~/rubynette/rubynette.rb
+    ```
 3. Add the path to your ~/.myzshrc (or ~/.bash_profile).
-    export PATH=$PATH:~/bin
+    `export PATH=$PATH:~/bin`
 4. Reload your shell
-    $> source ~/.myzshrc
+    `$> source ~/.myzshrc`
 
 ##Usage
 
     $> rubynette [file1] [file2] [file3] ...
+    $> rubynette *.c
+    $> rubynette *.h
+    
 
 ##Update
 To update the rubynette just go to your ~/rubynette and pull the master branch
+
     $> cd ~/rubynette
-    $> git fetch 
+    $> git fetch
     $> git pull origin master
 
 ##License
