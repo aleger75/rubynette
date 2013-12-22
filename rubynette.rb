@@ -6,7 +6,7 @@
 #    By: mbacoux <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2013/12/10 15:24:10 by mbacoux           #+#    #+#              #
-#    Updated: 2013/12/17 05:17:57 by mbacoux          ###   ########.fr        #
+#    Updated: 2013/12/22 10:51:16 by aspeer           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -194,9 +194,9 @@ class ParserSource < ParserText
 					"float", "long", "double", "size_t", "auto", "struct", "typedef",
 					"return", "break", "continue", "extern", "register", "restrict",
 					"void", "enum", "union", "volatile", "inline" ]
-		@binary_ops = [ ">>", "<<", "&&", "||", "==", "+=", "-=", "*=", "/=", "%=", ">=", "<=",
-						"?", ":", "!=", "&=", "|=", "^=", "^", "|", "=", "/",
-						">", "<"]
+		@binary_ops = [ ">>=", "<<=", ">>", "<<", "&&", "||", "==", "+=", "-=", "*=", "/=", "%=",
+						">=", "<=", "?", ":", "!=", "&=", "|=", "^=", "^", "|",
+						"=", "/", ">", "<"]
 	end
 	def self.can_handle? (file)
 		return (File.extname(file) == ".c" or File.extname(file) == ".h")
