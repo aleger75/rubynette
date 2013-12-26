@@ -6,7 +6,7 @@
 #    By: mbacoux <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2013/12/10 15:24:10 by mbacoux           #+#    #+#              #
-#    Updated: 2013/12/22 10:51:16 by aspeer           ###   ########.fr        #
+#    Updated: 2013/12/26 13:53:34 by mbacoux          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -334,11 +334,11 @@ class ParserMakefile < ParserText
 	end
 	def handle (file)
 		path = File.dirname(file)
-		files = `make -Bn -C #{path} | grep -o "[a-zA-Z0-9_/-]*\\.c"`
+		files = `make -Bn -C #{path} | grep -o "[.a-zA-Z0-9_/-]*\\.c"`
 		files.each do |f|
 			@rubynette.do_file(path + (path == "/" ? "" : "/") + f.gsub(/[\n]/, ''));
 		end
-		files = `make -Bn -C #{path} | grep -o "\\-I[ ]*[a-zA-Z0-9_/-]*" | sed "s/-I//" | tr -d " " | sort -u`
+		files = `make -Bn -C #{path} | grep -o "\\-I[ ]*[.a-zA-Z0-9_/-]*" | sed "s/-I//" | tr -d " " | sort -u`
 		files = files + "."
 		files.each do |f|
 			dir = Dir.foreach(path + (path == "/" ? "" : "/") + f.gsub(/[\n]/, "")) do |d|
