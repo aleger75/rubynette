@@ -6,7 +6,7 @@
 #    By: mbacoux <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2013/12/10 15:24:10 by mbacoux           #+#    #+#              #
-#    Updated: 2013/12/26 13:53:34 by mbacoux          ###   ########.fr        #
+#    Updated: 2013/12/29 17:27:44 by mbacoux          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -311,8 +311,12 @@ class ParserSource < ParserText
 				if (word == "endif")
 					@space_indent -= 1
 				end
-				if (get_def_indent(line) != @space_indent)
-					error_line("Bad sharp indent, should be #{@space_indent.to_s}.", n)
+				check = @space_indent
+				if word == "else" or word == "elif"
+					check -= 1
+				end
+				if (get_def_indent(line) != check)
+					error_line("Bad sharp indent, should be #{check.to_s}.", n)
 				end
 				if word == "if" or word == "ifdef" or word == "ifndef"
 					@space_indent += 1
