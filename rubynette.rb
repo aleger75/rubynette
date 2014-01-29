@@ -125,7 +125,7 @@ class ParserBin < ParserFile
 		puts "Your binary file '#{File.basename(@filename)}' contains the following calls :"
 		calls = `nm -gu #{@filename} | sed 's/\$.*//' | sed '/^_/!D' | sed '/^__/D' | cut -c 2- | sed '/^ft_/D' | sort -u`
 		if calls
-			calls.each do |c|
+			calls.each_line do |c|
 				puts "--> #{c}"
 			end
 		end
@@ -339,12 +339,12 @@ class ParserMakefile < ParserText
 	def handle (file)
 		path = File.dirname(file)
 		files = `make -Bn -C #{path} | grep -o "[.a-zA-Z0-9_/-]*\\.c"`
-		files.each do |f|
+		files.each_line do |f|
 			@rubynette.do_file(path + (path == "/" ? "" : "/") + f.gsub(/[\n]/, ''));
 		end
 		files = `make -Bn -C #{path} | grep -o "\\-I[ ]*[.a-zA-Z0-9_/-]*" | sed "s/-I//" | tr -d " " | sort -u`
 		files = files + "."
-		files.each do |f|
+		files.each_line do |f|
 			dir = Dir.foreach(path + (path == "/" ? "" : "/") + f.gsub(/[\n]/, "")) do |d|
 				if File.extname(path + (path == "/" ? "" : "/") + f.gsub(/[\n]/, "") + "/" + d.gsub(/[\n]/, "")) == ".h"
 					@rubynette.do_file(path + (path == "/" ? "" : "/") + f.gsub(/[\n]/, "") + "/" + d.gsub(/[\n]/, ""))
@@ -352,7 +352,7 @@ class ParserMakefile < ParserText
 			end
 		end
 		files = `make -Bn -C #{path} | grep -o "make -C [.a-zA-Z0-9_/-]*" | cut -c 8- | tr -d " "`
-		files.each do |f|
+		files.each_line do |f|
 			@rubynette.do_file(path + (path == "/" ? "" : "/") + f.gsub(/[\n]/, "") + "/" + "Makefile")
 		end
 	end
